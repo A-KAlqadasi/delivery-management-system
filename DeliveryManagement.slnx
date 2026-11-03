@@ -1,0 +1,22 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/ModularMonolith.Host/ModularMonolith.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/Modules.Common.Api/Modules.Common.Api.csproj" />
+    <Project Path="src/Common/Modules.Common.Application/Modules.Common.Application.csproj" />
+    <Project Path="src/Common/Modules.Common.Domain/Modules.Common.Domain.csproj" />
+    <Project Path="src/Common/Modules.Common.Infrastructure/Modules.Common.Infrastructure.csproj" />
+    <Project Path="src/Common/Modules.Common.UnitTests/Modules.Common.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/Users/">
+    <Project Path="src/Users/Modules.Users.Domain/Modules.Users.Domain.csproj" />
+    <Project Path="src/Users/Modules.Users.Features/Modules.Users.Features.csproj" />
+    <Project Path="src/Users/Modules.Users.Infrastructure/Modules.Users.Infrastructure.csproj" />
+  </Folder>
+</Solution>

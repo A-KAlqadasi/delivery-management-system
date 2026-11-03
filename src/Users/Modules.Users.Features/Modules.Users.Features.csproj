@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Modules.Common.Api\Modules.Common.Api.csproj" />
+    <ProjectReference Include="..\..\Common\Modules.Common.Application\Modules.Common.Application.csproj" />
+    <ProjectReference Include="..\Modules.Users.Domain\Modules.Users.Domain.csproj" />
+  </ItemGroup>
+
+ <ItemGroup>
+   <Folder Include="Users\Login\" />
+   <Folder Include="Users\RefreshToken\" />
+ </ItemGroup>
+
+</Project>
