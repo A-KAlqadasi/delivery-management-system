@@ -19,12 +19,10 @@ internal sealed class GetUserQueryHandler(IUsersDbContext context)
 			.Where(u => u.Id == request.UserId)
 			.Select(u => new UserResponse(
 				u.Id,
-				u.Email,
+				u.Email!,
 				u.FirstName,
 				u.LastName))
 			.FirstOrDefaultAsync(cancellationToken);
-
-		// UserResponse? user = await userRepository.GetUserByIdAsync(request.UserId, cancellationToken);
 
 		return user ?? (Result<UserResponse>)UserErrors.NotFound(request.UserId);
 	}

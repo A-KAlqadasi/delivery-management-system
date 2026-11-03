@@ -5,11 +5,8 @@ using ModularMonolith.Host.Middlewares;
 using Modules.Common.Api.Extensions;
 using Modules.Users.Infrastructure;
 
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -22,7 +19,7 @@ builder.Services.AddOpenApi();
 // Reuse common infrastructure for web API, authentication, etc.
 builder.Services.AddCoreWebApiInfrastructure();
 
-builder.Configuration.AddModuleConfiguration(["users"]);
+//builder.Configuration.AddModuleConfiguration(["users"]);
 
 builder.Services.AddUsersModule(builder.Configuration);
 
@@ -34,16 +31,17 @@ if (app.Environment.IsDevelopment())
 
 	app.MapOpenApi();
 
-	app.UseSwaggerUI(options =>
-	{
-		options.SwaggerEndpoint("/openapi/v1.json", "Delivery management system API");
+	// app.UseSwaggerUI(options =>
+	// {
+	// 	options.SwaggerEndpoint("/openapi/v1.json", "Delivery management system API");
 
-		options.EnableDeepLinking();
-		options.DisplayRequestDuration();
-		options.EnableFilter();
-	});
+	// 	options.EnableDeepLinking();
+	// 	options.DisplayRequestDuration();
+	// 	options.EnableFilter();
+	// });
 
-	app.ApplyMigrations();
+	await app.ApplyMigrations();
+
 }
 // global middlewares
 app.UseCoreMiddlewares(app.Environment);

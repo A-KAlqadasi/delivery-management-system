@@ -1,52 +1,42 @@
 ﻿using Modules.Common.Domain;
+using Modules.Common.Domain.Results;
 
 namespace Modules.Users.Domain.Users;
 
-public sealed class User : Entity
+using Microsoft.AspNetCore.Identity;
+
+public sealed class User : IdentityUser<Guid>
 {
 	private readonly List<Role> _roles = [];
-	private User()
-	{
-	}
 
-	public Guid Id { get; private set; }
-
-	public string Email { get; private set; } = default!;
+	private User() { }
 
 	public string FirstName { get; private set; } = default!;
-
 	public string LastName { get; private set; } = default!;
-	public string IdentityId { get; private set; } = default!;
 
 	public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
 
-	public static User Create(string email, string firstName, string lastName, string identityId)
+	public static Result<User> Create(
+		string email,
+		string firstName,
+		string lastName,
+		Role role)
 	{
-		User user = new User
+		var user = new User
 		{
 			Id = Guid.NewGuid(),
+			UserName = email,
 			Email = email,
+			NormalizedEmail = email.ToUpperInvariant(),
+			NormalizedUserName = email.ToUpperInvariant(),
 			FirstName = firstName,
 			LastName = lastName,
-			IdentityId = identityId,
+			EmailConfirmed = true
 		};
 
-		user._roles.Add(Role.Admin);
-		user.Raise(new UserRegisteredDomainEvent(user.Id));
+		user._roles.Add(role);
 
 		return user;
 	}
 
-	public void Update(string firstName, string lastName)
-	{
-		if (FirstName == firstName && LastName == lastName)
-		{
-			return;
-		}
-
-		FirstName = firstName;
-		LastName = lastName;
-
-		Raise(new UserProfileUpdatedDomainEvent(Id, FirstName, LastName));
-	}
 }

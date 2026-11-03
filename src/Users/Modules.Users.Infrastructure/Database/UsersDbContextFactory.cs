@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Modules.Users.Infrastructure.Database;
 
-public class UsersDbContextFactory
+internal class UsersDbContextFactory
 		: IDesignTimeDbContextFactory<UsersDbContext>
 {
 	public UsersDbContext CreateDbContext(string[] args)
@@ -13,8 +13,8 @@ public class UsersDbContextFactory
 
 		DbContextOptionsBuilder<UsersDbContext> optionsBuilder = new DbContextOptionsBuilder<UsersDbContext>();
 
-		optionsBuilder.UseNpgsql("Host=evently.database;Port=5432;Database=evently;Username=postgres;Password=postgres;Include Error Detail=true", npgsqlOptions => npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Users))
-		 .UseSnakeCaseNamingConvention()
+		optionsBuilder.UseSqlServer("Server=Abu-Ghaith\\AMSQLSERVER;Database=DeliveryManagementDb;User Id=sa;Password=isa123456;TrustServerCertificate=True;", sqlServerOptions => sqlServerOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Users))
+		 .UseUpperCaseNamingConvention()
 		 .AddInterceptors();
 
 		return new UsersDbContext(optionsBuilder.Options);

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Modules.Users.Infrastructure.Identity;
 
-public class JwtOptions
+public class JwtSettings
 {
 	public const string SectionName = "JwtSettings";
 

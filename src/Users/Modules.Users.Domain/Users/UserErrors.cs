@@ -28,4 +28,6 @@ public static class UserErrors
 	public static readonly Error ExpiredAccessTokenInvalid =
 		Error.Validation("RefreshToken.ExpiredAccessTokenInvalid", "Expired access token is not valid.");
 
+	public static readonly Error RoleNotFound = Error.NotFound("Roles.NotFound", "Role is not found");
+
 }

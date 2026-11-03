@@ -2,6 +2,7 @@ using AlatrafClinic.Infrastructure.Data.Interceptors;
 
 using MassTransit;
 
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,11 +11,9 @@ using Modules.Common.Application.EventBus;
 using Modules.Common.Infrastructure.Authentication;
 using Modules.Common.Infrastructure.Authorization;
 using Modules.Common.Infrastructure.Clock;
-using Modules.Common.Infrastructure.Data;
 using Modules.Common.Infrastructure.EventBuses;
 using Modules.Common.Infrastructure.Outbox;
 
-using Npgsql;
 
 using Quartz;
 
@@ -23,17 +22,12 @@ namespace Modules.Common.Infrastructure;
 
 public static class InfrastructureConfiguration
 {
-	public static IServiceCollection AddCoreInfrastructure(this IServiceCollection services
-	, string databaseConnectionString)
+	public static IServiceCollection AddCoreInfrastructure(this IServiceCollection services)
 	{
 		services.AddAuthenticationInternal();
 		services.AddAuthorizationInternal();
 
-		NpgsqlDataSource npgsqlDataSource = new NpgsqlDataSourceBuilder(databaseConnectionString).Build();
 
-		services.TryAddSingleton(npgsqlDataSource);
-
-		services.AddScoped<IDbConnectionFactory, DBConnectionFactory>();
 		services.TryAddSingleton<IDateTimeProvider, DateTimeProvider>();
 
 		services.TryAddSingleton<InsertOutboxMessagesInterceptor>();

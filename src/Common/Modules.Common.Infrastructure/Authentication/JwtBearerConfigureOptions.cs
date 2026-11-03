@@ -11,7 +11,7 @@ internal sealed class JwtBearerConfigureOptions(
 	IConfiguration configuration)
 	: IConfigureNamedOptions<JwtBearerOptions>
 {
-	private const string ConfigurationSectionName = "Authentication";
+	private const string ConfigurationSectionName = "JwtSettings";
 
 	public void Configure(string? name, JwtBearerOptions options)
 	{

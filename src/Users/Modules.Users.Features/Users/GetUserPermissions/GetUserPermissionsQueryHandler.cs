@@ -17,7 +17,7 @@ internal sealed class GetUserPermissionsQueryHandler(IUsersDbContext context)
 		CancellationToken cancellationToken)
 	{
 		var permissions = await context.Users
-		.Where(u => u.IdentityId == request.IdentityId)
+		.Where(u => u.Id.ToString() == request.IdentityId)
 		.SelectMany(u => u.Roles,
 			(u, role) => new { u.Id, role })
 		.SelectMany(x => x.role.Permissions,

@@ -1,78 +1,149 @@
 using System.Security.Claims;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Modules.Common.Application.Authorization;
 using Modules.Common.Application.MediatR;
 using Modules.Common.Domain.Results;
 using Modules.Users.Domain.Users;
+using Modules.Users.Features.Abstractions.Data;
 using Modules.Users.Features.Abstractions.Identity;
 using Modules.Users.Features.Users.GetUser;
-using Modules.Users.Features.Users.GetUserPermissions;
 
 namespace Modules.Users.Features.Users.RefreshToken;
 
-public class RefreshTokenQueryHandler(ILogger<RefreshTokenQueryHandler> logger, IIdentityProviderService identityService, ITokenProvider tokenProvider, ISender sender)
-    : IRequestHandler<RefreshTokenQuery, Result<TokenResponse>>
+public record RefreshTokenQuery(string RefreshToken, string ExpiredAccessToken) : IRequest<Result<TokenResponse>>;
+
+
+
+internal sealed class RefreshTokenQueryHandler(
+	ILogger<RefreshTokenQueryHandler> logger,
+	IUsersDbContext context,
+	ITokenProvider tokenProvider,
+	ISender sender)
+	: IRequestHandler<RefreshTokenQuery, Result<TokenResponse>>
 {
+	public async Task<Result<TokenResponse>> Handle(
+		RefreshTokenQuery request,
+		CancellationToken cancellationToken)
+	{
+		var userIdResult = GetUserIdFromExpiredToken(
+			request.ExpiredAccessToken);
 
-    public async Task<Result<TokenResponse>> Handle(RefreshTokenQuery request, CancellationToken cancellationToken)
-    {
-        var principal = tokenProvider.GetPrincipalFromExpiredToken(request.ExpiredAccessToken);
+		if (userIdResult.IsError)
+		{
+			return userIdResult.Errors;
+		}
 
-        if (principal is null)
-        {
-            logger.LogError("Expired access token is not valid");
+		Guid userId = userIdResult.Value;
 
-            return UserErrors.ExpiredAccessTokenInvalid;
-        }
+		var userResult = await sender.Send(
+			new GetUserQuery(userId),
+			cancellationToken);
 
-        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+		if (userResult.IsError)
+		{
+			return userResult.Errors;
+		}
 
-        if (userId is null)
-        {
-            logger.LogError("Invalid userId claim");
+		var refreshTokenResult = await ValidateRefreshTokenAsync(
+			request.RefreshToken,
+			userId,
+			cancellationToken);
 
-            return UserErrors.UserIdRequired;
-        }
+		if (refreshTokenResult.IsError)
+		{
+			return refreshTokenResult.Errors;
+		}
 
-        var userIdGuid = Guid.Parse(userId);
+		var roles = await GetUserRolesAsync(userId, cancellationToken);
 
-        var userResult = await sender.Send(new GetUserQuery(userIdGuid), cancellationToken);
+		var permissions = await GetUserPermissionsAsync(
+			userId,
+			cancellationToken);
 
-        if (userResult.IsError)
-        {
-            logger.LogError("Get user by id error occurred: {ErrorDescription}", userResult.TopError.Description);
-            return userResult.Errors;
-        }
+		var user = new UserDetailsDto(
+			UserId: userResult.Value.Id,
+			Email: userResult.Value.Email!,
+			Roles: roles,
+			Permissions: permissions);
 
-        var userPermissions = await sender.Send(new GetUserPermissionsQuery(userId), cancellationToken);
+		return await tokenProvider.GenerateJwtTokenAsync(
+			user,
+			cancellationToken);
+	}
 
-        var refreshToken = await identityService.GetRefreshTokenAsync(request.RefreshToken, userId);
+	private Result<Guid> GetUserIdFromExpiredToken(string expiredAccessToken)
+	{
+		var principal = tokenProvider.GetPrincipalFromExpiredToken(
+			expiredAccessToken);
 
-        if (refreshToken is null || refreshToken.Value.ExpiresOnUtc < DateTime.UtcNow)
-        {
-            logger.LogError("Refresh token has expired");
+		if (principal is null)
+		{
+			logger.LogWarning("Expired access token is invalid.");
+			return UserErrors.ExpiredAccessTokenInvalid;
+		}
 
-            return UserErrors.RefreshTokenIdRequired;
-        }
+		string? userIdClaim =
+			principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+			?? principal.FindFirst(CustomClaims.Sub)?.Value;
 
-        var user = new UserDetailsDto
-        {
-            UserId = userResult.Value.Id.ToString(),
-            Email = userResult.Value.Email!,
-            Permissions = userPermissions.Value.Permissions.ToList()
-        };
+		if (!Guid.TryParse(userIdClaim, out Guid userId))
+		{
+			logger.LogWarning("Invalid user ID claim.");
+			return UserErrors.UserIdRequired;
+		}
 
+		return userId;
+	}
 
-        var generateTokenResult = await tokenProvider.GenerateJwtTokenAsync(user, cancellationToken);
+	private async Task<Result<bool>> ValidateRefreshTokenAsync(
+		string refreshToken,
+		Guid userId,
+		CancellationToken cancellationToken)
+	{
+		var token = await context.RefreshTokens
+			.AsNoTracking()
+			.FirstOrDefaultAsync(
+				rt => rt.Token == refreshToken &&
+					  rt.UserId == userId.ToString(),
+				cancellationToken);
 
-        if (generateTokenResult.IsError)
-        {
-            logger.LogError("Generate token error occurred: {ErrorDescription}", generateTokenResult.TopError.Description);
+		if (token is null ||
+			token.ExpiresOnUtc <= DateTimeOffset.UtcNow)
+		{
+			logger.LogWarning(
+				"Refresh token is invalid or expired for user {UserId}.",
+				userId);
 
-            return generateTokenResult.Errors;
-        }
+			return UserErrors.RefreshTokenIdRequired;
+		}
 
-        return generateTokenResult.Value;
-    }
+		return true;
+	}
+
+	private async Task<List<string>> GetUserRolesAsync(
+		Guid userId,
+		CancellationToken cancellationToken)
+	{
+		return await context.Users
+			.Where(u => u.Id == userId)
+			.SelectMany(u => u.Roles)
+			.Select(r => r.Name)
+			.ToListAsync(cancellationToken);
+	}
+
+	private async Task<List<string>> GetUserPermissionsAsync(
+		Guid userId,
+		CancellationToken cancellationToken)
+	{
+		return await context.Users
+			.Where(u => u.Id == userId)
+			.SelectMany(u => u.Roles)
+			.SelectMany(r => r.Permissions)
+			.Select(p => p.Code)
+			.Distinct()
+			.ToListAsync(cancellationToken);
+	}
 }

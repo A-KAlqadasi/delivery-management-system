@@ -9,9 +9,7 @@
     <ProjectReference Include="..\Modules.Users.Features\Modules.Users.Features.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" version="9.0.5" />
-  </ItemGroup>
+
 
   <ItemGroup>
 	<InternalsVisibleTo Include="Modules.Users.IntegrationTests" />

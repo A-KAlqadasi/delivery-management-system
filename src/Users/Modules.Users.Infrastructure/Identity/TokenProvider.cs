@@ -14,7 +14,7 @@ using Modules.Users.Infrastructure.Database;
 
 namespace Modules.Users.Infrastructure.Identity;
 
-public class TokenProvider(IOptions<JwtOptions> configuration, UsersDbContext context) : ITokenProvider
+internal class TokenProvider(IOptions<JwtSettings> configuration, UsersDbContext context) : ITokenProvider
 {
 
 	public async Task<Result<TokenResponse>> GenerateJwtTokenAsync(UserDetailsDto user, CancellationToken ct = default)
@@ -77,7 +77,7 @@ public class TokenProvider(IOptions<JwtOptions> configuration, UsersDbContext co
 		var securityToken = tokenHandler.CreateToken(
 			CreateTokenDescriptor(claims, expires));
 
-		var refreshTokenResult = CreateRefreshToken(user.UserId);
+		var refreshTokenResult = CreateRefreshToken(user.UserId.ToString());
 
 		if (refreshTokenResult.IsError)
 		{
@@ -86,7 +86,7 @@ public class TokenProvider(IOptions<JwtOptions> configuration, UsersDbContext co
 
 		var refreshToken = refreshTokenResult.Value;
 
-		await SaveRefreshTokenAsync(user.UserId, refreshToken, ct);
+		await SaveRefreshTokenAsync(user.UserId.ToString(), refreshToken, ct);
 
 		return new TokenResponse
 		{
@@ -100,10 +100,10 @@ public class TokenProvider(IOptions<JwtOptions> configuration, UsersDbContext co
 	{
 		var claims = new List<Claim>
 	{
-		new(JwtRegisteredClaimNames.Sub, user.UserId),
+		new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
 		new(JwtRegisteredClaimNames.UniqueName, user.Email),
-		new(ClaimTypes.NameIdentifier, user.UserId),
-		new(ClaimTypes.Name, user.Email)
+		new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+		new(ClaimTypes.Role, user.Roles.First())
 	};
 
 		claims.AddRange(user.Permissions.Select(
@@ -168,3 +168,4 @@ public class TokenProvider(IOptions<JwtOptions> configuration, UsersDbContext co
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 	}
 }
+

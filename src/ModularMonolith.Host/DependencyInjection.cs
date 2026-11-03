@@ -193,7 +193,7 @@ public static class DependencyInjection
 
 
 		// 4. Serilog request logging (early to log all requests)
-		app.UseSerilogRequestLogging();
+		// app.UseSerilogRequestLogging();
 
 		// 5. CORS (before authentication/authorization)
 		//app.UseCors(configuration["AppSettings:CorsPolicyName"]!);

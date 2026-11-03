@@ -13,7 +13,7 @@ public sealed class RefreshTokenEndpoint : IApiEndpoint
 {
 	public void MapEndpoint(WebApplication app)
 	{
-		app.MapPost("users/refresh-token", async (
+		app.MapPost("/api/users/refresh-token", async (
 			RefreshTokenQuery request,
 			ISender sender,
 			CancellationToken ct) =>

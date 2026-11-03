@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 using Modules.Common.Api.Abstractions;
 using Modules.Common.Api.Extensions;
@@ -14,15 +15,17 @@ public sealed class LoginEndpoint : IApiEndpoint
 {
 	public void MapEndpoint(WebApplication app)
 	{
-		app.MapPost("users/login", async (
-			LoginRequest request,
-			ISender sender) =>
-		{
-			Result<TokenResponse> result = await sender.Send(request);
-
-			return result.Match(Results.Ok, e => e.ToProblem());
-		})
-		.RequireAuthorization("users:create")
+		app.MapPost("/api/users/login", Handle)
+		.AllowAnonymous()
 		.WithTags(Tags.Users);
+	}
+	private static async Task<IResult> Handle(
+		[FromBody] LoginCommand request,
+		ISender sender,
+		CancellationToken cancellationToken)
+	{
+		var result = await sender.Send(request, cancellationToken);
+
+		return result.Match(s => Results.Ok(s), e => e.ToProblem());
 	}
 }
