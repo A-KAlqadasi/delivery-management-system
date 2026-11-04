@@ -14,6 +14,11 @@
     <Project Path="src/Common/Modules.Common.Infrastructure/Modules.Common.Infrastructure.csproj" />
     <Project Path="src/Common/Modules.Common.UnitTests/Modules.Common.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/src/Delivery/">
+    <Project Path="src/Delivery/Delivery.Domain/Delivery.Domain.csproj" />
+    <Project Path="src/Delivery/Delivery.Features/Delivery.Features.csproj" />
+    <Project Path="src/Delivery/Delivery.Infrastructure/Delivery.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Users/">
     <Project Path="src/Users/Modules.Users.Domain/Modules.Users.Domain.csproj" />
     <Project Path="src/Users/Modules.Users.Features/Modules.Users.Features.csproj" />

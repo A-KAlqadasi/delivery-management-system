@@ -1,4 +1,6 @@
 ﻿
+using Delivery.Infrastructure.Database;
+
 using Modules.Users.Infrastructure.Database;
 
 namespace ModularMonolith.Host.Extensions;
@@ -9,6 +11,7 @@ internal static class MigrationsExtensions
 	{
 
 		await app.InitialiseUsersModuleDatabaseAsync();
+		await app.InitialiseDeliveryModuleDatabaseAsync();
 
 	}
 

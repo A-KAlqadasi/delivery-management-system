@@ -11,7 +11,6 @@ using Modules.Users.Infrastructure.Authorization;
 using Modules.Users.Infrastructure.Database;
 using Modules.Common.Application;
 using Modules.Common.Application.Authorization;
-using Modules.Common.Application.Messaging;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Modules.Users.Domain.Users;
 using Modules.Users.Infrastructure.Identity;
@@ -42,6 +41,7 @@ public static class UsersModule
 
 		return services;
 	}
+
 	private static IServiceCollection AddUsersInfrastructure(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddScoped<IPermissionService, PermissionService>();

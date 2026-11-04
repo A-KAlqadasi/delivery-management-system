@@ -15,7 +15,7 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
 
 		builder.Property(p => p.Code).HasMaxLength(100);
 
-		builder.HasData(Permission.GetUser, Permission.CreateUser);
+		builder.HasData(Permission.GetUser, Permission.CreateUser, Permission.ReadZone, Permission.CreateZone, Permission.UpdateZone, Permission.DeleteZone);
 
 		builder
 			.HasMany<Role>()
@@ -28,6 +28,10 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
 					// Member permissions
 					CreateRolePermission(Role.Admin, Permission.GetUser),
 					CreateRolePermission(Role.Admin, Permission.CreateUser),
+					CreateRolePermission(Role.Admin, Permission.ReadZone),
+					CreateRolePermission(Role.Admin, Permission.CreateZone),
+					CreateRolePermission(Role.Admin, Permission.UpdateZone),
+					CreateRolePermission(Role.Admin, Permission.DeleteZone),
 
 					CreateRolePermission(Role.Courier, Permission.GetUser),
 					CreateRolePermission(Role.Dispatcher, Permission.GetUser)

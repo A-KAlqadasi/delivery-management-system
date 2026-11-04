@@ -124,6 +124,22 @@ namespace Modules.Users.Infrastructure.Migrations
                         new
                         {
                             Code = "users:create"
+                        },
+                        new
+                        {
+                            Code = "zones:read"
+                        },
+                        new
+                        {
+                            Code = "zones:create"
+                        },
+                        new
+                        {
+                            Code = "zones:update"
+                        },
+                        new
+                        {
+                            Code = "zones:delete"
                         });
                 });
 
@@ -293,6 +309,26 @@ namespace Modules.Users.Infrastructure.Migrations
                         new
                         {
                             PermissionsCode = "users:create",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            PermissionsCode = "zones:read",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            PermissionsCode = "zones:create",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            PermissionsCode = "zones:update",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            PermissionsCode = "zones:delete",
                             RoleName = "Admin"
                         },
                         new

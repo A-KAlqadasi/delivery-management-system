@@ -1,3 +1,5 @@
+using Delivery.Infrastructure;
+
 using ModularMonolith.Host;
 using ModularMonolith.Host.Extensions;
 using ModularMonolith.Host.Middlewares;
@@ -22,6 +24,7 @@ builder.Services.AddCoreWebApiInfrastructure();
 //builder.Configuration.AddModuleConfiguration(["users"]);
 
 builder.Services.AddUsersModule(builder.Configuration);
+builder.Services.AddDeliveryModule(builder.Configuration);
 
 var app = builder.Build();
 
